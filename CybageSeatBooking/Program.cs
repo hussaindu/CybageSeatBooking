@@ -1,5 +1,4 @@
 using CybageSeatBooking.Models;
-using CybageSeatBooking.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

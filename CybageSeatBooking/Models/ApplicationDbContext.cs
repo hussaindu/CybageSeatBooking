@@ -1,8 +1,7 @@
-﻿using CybageSeatBooking.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace CybageSeatBooking.Service
+namespace CybageSeatBooking.Models
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
@@ -12,7 +11,7 @@ namespace CybageSeatBooking.Service
         }
         public DbSet<SeatBooking> seatBookings { get; set; }
 
-        public DbSet<Seat> seats {  get; set; } 
+        public DbSet<Seat> seats { get; set; }
     }
 
 
