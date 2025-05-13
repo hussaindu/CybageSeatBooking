@@ -1,0 +1,30 @@
+﻿@model List<Seat>
+@{
+}
+<h2>Seat List</h2>
+
+<a asp-controller="Seat" asp-action="Create" class="btn btn-primary mb-3">Add New Seat</a>
+
+<table class="table table-bordered table-striped me-2">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Seat Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var seat in Model)
+        {
+            <tr>
+                <td>@seat.Id</td>
+                <td>@seat.SeatNumber</td>
+                <td>
+                    @* <a asp-action="Edit" asp-route-id="@seat.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@seat.Id" class="btn btn-sm btn-info">Details</a> *@
+                    <a asp-action="Delete" asp-route-id="@seat.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,55 @@
+﻿@model SeatBooking
+
+@{
+    ViewData["Title"] = "Book Seat";
+    var seatList = ViewBag.SeatList as List<Seat>;
+    var availableSeatIds = ViewBag.AvailableSeatIds as List<int>;
+}
+
+<h2 class="mb-4">Select a Seat</h2>
+
+<form asp-action="Create" method="post">
+    <div class="card p-4 border shadow-sm">
+        <div class="row">
+            @foreach (var seat in seatList)
+            {
+                var isAvailable = availableSeatIds.Contains(seat.Id);
+                var labelClass = isAvailable ? "btn-outline-primary" : "btn-danger";
+                var disabled = isAvailable ? "" : "disabled";
+                <div class="col-4 col-sm-3 col-md-2 mb-3">
+                    <input type="radio" class="btn-check" name="SeatId" id="seat_@seat.Id"
+                           value="@seat.Id" autocomplete="off" @(disabled) />
+                    <label class="btn w-100 py-3 @labelClass" for="seat_@seat.Id">
+                        @seat.SeatNumber
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-4">Book Seat for 1 Week</button>
+</form>
+
+
+
+<style>
+    .btn-check:checked + .btn-outline-primary {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .btn-outline-primary,
+    .btn-danger {
+        font-size: 1rem;
+        text-align: center;
+        border-radius: 8px;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+</style>

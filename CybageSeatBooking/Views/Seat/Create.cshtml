@@ -1,0 +1,26 @@
+﻿@model CybageSeatBooking.Models.Seat
+
+@{
+    ViewData["Title"] = "Create Seat";
+}
+
+<h2>Create Seat</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="SeatNumber" class="form-label"></label>
+        <input asp-for="SeatNumber" class="form-control" />
+        <span asp-validation-for="SeatNumber" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<SeatBooking>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Booked Seats";
+    var currentUserId = UserManager.GetUserId(User);
+}
+
+<h2>Booked Seats</h2>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Seat Number</th>
+            <th>Id</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model)
+        {
+            var isCurrentUser = booking.User != null && booking.User.Id == currentUserId;
+            var rowClass = isCurrentUser ? "table-success" : "";
+
+            <tr class="@rowClass">
+                <td>@booking.Seat?.SeatNumber</td>
+                <td>@booking.Id</td>
+                <td>@booking.StartDate.ToString("dd-MMM-yyyy")</td>
+                <td>@booking.EndDate.ToString("dd-MMM-yyyy")</td>
+                <td>
+                    <a asp-action="Cancel" asp-route-id="@booking.Id" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to cancel this booking?');">
+                        Cancel
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>
