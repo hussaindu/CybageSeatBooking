@@ -1,15 +1,14 @@
-﻿using CybageSeatBooking.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.VisualBasic;
 
-namespace CybageSeatBooking.Service
+namespace CybageSeatBooking.Models
 {
     public class DataIntilizer
     {
         public static async Task SeedDataAsync(UserManager<ApplicationUser>? userManager,
                                           RoleManager<IdentityRole>? roleManager)
         {
-            if(userManager == null && roleManager == null)
+            if (userManager == null && roleManager == null)
             {
                 Console.WriteLine("usermanager and role manager does not exists");
                 return;
@@ -35,7 +34,7 @@ namespace CybageSeatBooking.Service
             //checking multiples admin are there
 
             var adminUsers = await userManager.GetUsersInRoleAsync("admin");
-            if (adminUsers.Any()) 
+            if (adminUsers.Any())
             {
                 Console.WriteLine("Admin users already exists => exists");
                 return;
