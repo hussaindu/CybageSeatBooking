@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< Updated upstream
+=======
+    <Folder Include="Repository\" />
+>>>>>>> Stashed changes
     <Folder Include="Services\" />
   </ItemGroup>
 
