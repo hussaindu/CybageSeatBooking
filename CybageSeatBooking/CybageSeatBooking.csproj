@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Models\DTOs\**" />
+    <Compile Remove="Services\**" />
     <Content Remove="Models\DTOs\**" />
+    <Content Remove="Services\**" />
     <EmbeddedResource Remove="Models\DTOs\**" />
+    <EmbeddedResource Remove="Services\**" />
     <None Remove="Models\DTOs\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,7 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <Folder Include="Repository\Interface\" />
+    <Folder Include="Repository\Implementation\" />
   </ItemGroup>
 
 </Project>
