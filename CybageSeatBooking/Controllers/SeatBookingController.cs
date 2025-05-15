@@ -1,84 +1,88 @@
 ﻿using CybageSeatBooking.Models;
+using CybageSeatBooking.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
 namespace CybageSeatBooking.Controllers
 {
+    [Authorize]
     public class SeatBookingController : Controller
-
     {
-
-        private readonly ApplicationDbContext _context;
+        private readonly ISeatBookingService _seatBookingService;
         private readonly UserManager<ApplicationUser> _userManager;
-        public SeatBookingController(ApplicationDbContext context,UserManager<ApplicationUser> userManager)
+
+        public SeatBookingController(ISeatBookingService seatBookingService, UserManager<ApplicationUser> userManager)
         {
-            _context = context;
+            _seatBookingService = seatBookingService;
             _userManager = userManager;
         }
 
-
         public async Task<IActionResult> Index()
         {
-            var bookings = await _context.seatBookings
-                .Include(b => b.Seat)
-                .Include(b => b.User)
-                .OrderByDescending(b => b.StartDate)
-                .ToListAsync();
-         
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                // Redirect to an error page or return an appropriate message
+                return RedirectToAction("Error", "Home");
+            }
 
+            var bookings = await _seatBookingService.GetUserBookingsAsync(userId);
             return View(bookings);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var allSeats = await _context.seats
-                .Include(s => s.seatBookings)
-                .ToListAsync();
+            var availableSeats = await _seatBookingService.GetAvailableSeatsAsync();
 
-            var availableSeats = allSeats
-                .Where(s => !s.seatBookings.Any(b =>
-                    b.StartDate <= DateTime.Now.AddDays(7) &&
-                    b.EndDate >= DateTime.Now))
-                .ToList();
-
-            ViewBag.SeatList = allSeats;
+            ViewBag.SeatList = availableSeats;
             ViewBag.AvailableSeatIds = availableSeats.Select(s => s.Id).ToList();
 
             return View();
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-       
         public async Task<IActionResult> Create(SeatBooking booking)
         {
-            booking.EmployeeId = _userManager.GetUserId(User);
+            ModelState.Remove("EmployeeId");
+            ModelState.Remove("User");
+            ModelState.Remove("Seat");
+
+            if (!ModelState.IsValid)
+            {
+                var availableSeats = await _seatBookingService.GetAvailableSeatsAsync();
+                ViewBag.AvailableSeatIds = availableSeats.Select(s => s.Id).ToList();
+                ViewBag.SeatList = availableSeats;
+
+                return View(booking);
+            }
+
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            booking.EmployeeId = userId;
             booking.StartDate = DateTime.Now;
             booking.EndDate = DateTime.Now.AddDays(7);
 
-            _context.Add(booking);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index","SeatBooking");
+            await _seatBookingService.CreateBookingAsync(booking);
+            return RedirectToAction("Index", "SeatBooking");
         }
 
 
         public async Task<IActionResult> Cancel(int id)
         {
-            var booking = await _context.seatBookings.FindAsync(id);
-
-            if(booking == null)
+            var result = await _seatBookingService.CancelBookingAsync(id);
+            if (!result)
             {
                 return NotFound();
             }
-            _context.seatBookings.Remove(booking);
-            await _context.SaveChangesAsync();
+
             return RedirectToAction("Index", "SeatBooking");
         }
     }
-    
-        
 }
