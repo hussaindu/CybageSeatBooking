@@ -1,4 +1,5 @@
 ﻿using CybageSeatBooking.Models;
+using CybageSeatBooking.Service.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,31 +8,26 @@ namespace CybageSeatBooking.Controllers
 {
     public class UserController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ApplicationDbContext _context;
-        public UserController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+       
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-            _userManager=userManager;
-            _context=context;
+          
+            _userService=userService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var allUsers=_userManager.Users.OrderByDescending(x => x.CreateAt).ToList();
+            var allUsers = await _userService.GetAllUsersAsync();
             return View(allUsers);
         }
+
         public async Task<IActionResult> Delete(string id)
         {
-            var userId = await _userManager.FindByIdAsync(id);
-            if (userId == null)
-            {
+            var success = await _userService.DeleteUserAsync(id);
+            if (!success)
                 return NotFound();
-            }
 
-            var result =await _userManager.DeleteAsync(userId);
-             
-           
-            return RedirectToAction("Index","User");
-
+            return RedirectToAction("Index", "User");
         }
     }
 }

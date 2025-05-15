@@ -1,4 +1,5 @@
 ﻿using CybageSeatBooking.Models;
+using CybageSeatBooking.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,19 +7,19 @@ namespace CybageSeatBooking.Controllers
 {
     public class SeatController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ISeatService _seatService;
 
-        public SeatController(ApplicationDbContext context)
+        public SeatController(ISeatService seatService)
         {
-            _context = context;
+            _seatService=seatService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var list = await _context.seats
-                .OrderByDescending(x => x.Id)
-                .ToListAsync();
-            return View(list);
+            
+               var seat = await _seatService.GetAllSeatsAsync();
+            
+                return View(seat);
         }
 
         [HttpGet]
@@ -31,32 +32,25 @@ namespace CybageSeatBooking.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SeatDto seatDto)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return View(seatDto);
             }
 
-            var seat = new Seat
-            {
-                SeatNumber = seatDto.SeatNumber
-            };
-
-            _context.Add(seat);
-            await _context.SaveChangesAsync(); 
+            await _seatService.AddSeatAsync(seatDto);
+               
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var seat = await _context.seats.FindAsync(id);
-
-            if (seat == null) 
+            var success = await _seatService.DeleteSeatAsync(id);
+            if (!success)
             {
                 return NotFound();
             }
+               
 
-            _context.Remove(seat);
-            await _context.SaveChangesAsync(); 
             return RedirectToAction(nameof(Index));
         }
     }

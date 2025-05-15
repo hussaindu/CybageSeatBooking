@@ -1,102 +1,69 @@
 ﻿using CybageSeatBooking.Models;
-using Microsoft.AspNetCore.Identity;
+using CybageSeatBooking.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CybageSeatBooking.Controllers
+public class AccountController : Controller
 {
-    public class AccountController : Controller
-    { 
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
+    private readonly IAccountService _accountService;
 
+    public AccountController(IAccountService accountService)
+    {
+        _accountService = accountService;
+    }
 
-        public AccountController(UserManager<ApplicationUser> userManger, SignInManager<ApplicationUser> signInManager)
-        {
-            this.userManager=userManger;
-            this.signInManager=signInManager;
-        }
-        public IActionResult Register()
-        {
-            return View();
-        }
+    [HttpGet]
+    public IActionResult Login()
+    {
+        return View();
+    }
 
-        [HttpPost]
-
-        public async Task<IActionResult> Register(RegisterDto registerDto)
-        {
-            if (signInManager.IsSignedIn(User))
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            if (!ModelState.IsValid) 
-            {
-                return View(registerDto);
-            }
-
-            //create a new employee
-
-            var user = new ApplicationUser()
-            {
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                Email = registerDto.Email,
-                UserName = registerDto.Email,
-                
-                CreateAt = DateTime.Now
-            };
-
-            var result = await userManager.CreateAsync(user, registerDto.Password);
-            if (result.Succeeded) 
-            {
-                await userManager.AddToRoleAsync(user, "employee");
-
-                await signInManager.SignInAsync(user,  false);
-
-                return RedirectToAction("Index", "Home");
-
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-            return View(registerDto);
-        }
-        public IActionResult Login()
-        {
-           
-            return View();
-        }
-        [HttpPost]
-
-        public async Task<IActionResult> Login(LoginDto loginDto)
-        {
-            if (signInManager.IsSignedIn(User))
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            if (!ModelState.IsValid)
-            {
-                return View(loginDto);
-            }
-            var result = await signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, loginDto.RememberMe, false);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            else
-            {
-                ViewBag.ErrorMessage = "Invalid login attemped";
-            }
-            return View(loginDto);
-        }
-        public async Task<IActionResult> Logout()
-        {
-            if(signInManager.IsSignedIn(User))
-            {
-                await signInManager.SignOutAsync();
-            }
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginDto loginDto)
+    {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
             return RedirectToAction("Index", "Home");
-        }
+
+        if (!ModelState.IsValid)
+            return View(loginDto);
+
+        bool success = await _accountService.LoginAsync(loginDto);
+
+        if (success)
+            return RedirectToAction("Index", "Home");
+
+        ViewBag.ErrorMessage = "Invalid login attempt";
+        return View(loginDto);
+    }
+
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Register(RegisterDto registerDto)
+    {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+            return RedirectToAction("Index", "Home");
+
+        if (!ModelState.IsValid)
+            return View(registerDto);
+
+        var (success, errors) = await _accountService.RegisterAsync(registerDto);
+
+        if (success)
+            return RedirectToAction("Index", "Home");
+
+        foreach (var error in errors)
+            ModelState.AddModelError("", error);
+
+        return View(registerDto);
+    }
+
+    public async Task<IActionResult> Logout()
+    {
+        await _accountService.LogoutAsync();
+        return RedirectToAction("Index", "Home");
     }
 }
