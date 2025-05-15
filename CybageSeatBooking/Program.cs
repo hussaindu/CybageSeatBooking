@@ -27,13 +27,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Register your DI services with concrete implementations
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ISeatBookingRepository, SeatBookingRepository>();
 builder.Services.AddScoped<ISeatBookingService, SeatBookingService>();
 builder.Services.AddScoped<ISeatRepository, SeatRepository>();
 builder.Services.AddScoped<ISeatService, SeatService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUsersRepository, UserRepository>();
+
 
 
 var app = builder.Build();
