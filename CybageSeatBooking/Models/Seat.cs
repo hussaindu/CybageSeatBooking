@@ -9,6 +9,6 @@ namespace CybageSeatBooking.Models
         [Required]
         public string SeatNumber { get; set; } = "";
 
-        public ICollection<SeatBooking> seatBookings { get; set; }
+        public ICollection<SeatBooking> seatBookings { get; set; } = new List<SeatBooking>();
     }
 }
