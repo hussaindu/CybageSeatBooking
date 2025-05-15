@@ -32,6 +32,8 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ISeatBookingRepository, SeatBookingRepository>();
 builder.Services.AddScoped<ISeatBookingService, SeatBookingService>();
+builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+builder.Services.AddScoped<ISeatService, SeatService>();
 
 
 var app = builder.Build();
