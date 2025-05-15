@@ -7,17 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\DTOs\**" />
-    <Compile Remove="Services\**" />
-    <Content Remove="Models\DTOs\**" />
-    <Content Remove="Services\**" />
-    <EmbeddedResource Remove="Models\DTOs\**" />
-    <EmbeddedResource Remove="Services\**" />
-    <None Remove="Models\DTOs\**" />
-    <None Remove="Services\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
@@ -25,11 +14,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Repository\Interface\" />
-    <Folder Include="Repository\Implementation\" />
   </ItemGroup>
 
 </Project>
