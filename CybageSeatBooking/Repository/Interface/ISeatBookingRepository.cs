@@ -10,5 +10,18 @@ namespace CybageSeatBooking.Repository.Interface
         Task<SeatBooking?> GetBookingByIdAsync(int id);
         Task DeleteBookingAsync(SeatBooking booking);
         Task SaveChangesAsync();
+        Task<bool> IsSeatAlreadyBookedAsync(int seatId, DateTime startDate, DateTime endDate);
+
+        
+
+        Task<bool> HasBookingForWeekAsync(string employeeId, DateTime startDate, DateTime endDate);
+
+
+
+
+
+
+
+
     }
 }

@@ -1,4 +1,4 @@
-﻿using CybageSeatBooking.Models;
+﻿ using CybageSeatBooking.Models;
 using CybageSeatBooking.Service.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

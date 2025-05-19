@@ -4,10 +4,21 @@
     ViewData["Title"] = "Book Seat";
     var seatList = ViewBag.SeatList as List<Seat> ?? new List<Seat>();
     var availableSeatIds = ViewBag.AvailableSeatIds as List<int> ?? new List<int>();
+    var nextWeekStart = ViewBag.NextWeekStart as string;
+    var nextWeekEnd = ViewBag.NextWeekEnd as string;
 }
 
 <h2 class="mb-4">Select a Seat</h2>
-<div asp-validation-summary="All" class="text-danger"></div>
+
+@if (!string.IsNullOrEmpty(nextWeekStart) && !string.IsNullOrEmpty(nextWeekEnd))
+{
+    <div class="alert alert-info">
+        <strong>Note:</strong> You are booking a seat for the week from
+        <strong>@nextWeekStart</strong> to <strong>@nextWeekEnd</strong>.
+    </div>
+}
+
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
 
 <form asp-action="Create" method="post">
     <div class="card p-4 border shadow-sm">
@@ -19,12 +30,12 @@
                     var isAvailable = availableSeatIds.Contains(seat.Id);
                     var labelClass = isAvailable ? "btn-outline-primary" : "btn-danger";
                     var disabled = isAvailable ? "" : "disabled";
+
                     <div class="col-4 col-sm-3 col-md-2 mb-3">
                         <input type="radio" class="btn-check" name="SeatId" id="seat_@seat.Id" value="@seat.Id" autocomplete="off" @(disabled) />
                         <label class="btn w-100 py-3 @labelClass" for="seat_@seat.Id">
                             @seat.SeatNumber
                         </label>
-
                     </div>
                 }
             }

@@ -12,7 +12,9 @@ namespace CybageSeatBooking.Controllers
         private readonly ISeatBookingService _seatBookingService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public SeatBookingController(ISeatBookingService seatBookingService, UserManager<ApplicationUser> userManager)
+        public SeatBookingController(
+            ISeatBookingService seatBookingService,
+            UserManager<ApplicationUser> userManager)
         {
             _seatBookingService = seatBookingService;
             _userManager = userManager;
@@ -22,10 +24,7 @@ namespace CybageSeatBooking.Controllers
         {
             var userId = _userManager.GetUserId(User);
             if (userId == null)
-            {
-                // Redirect to an error page or return an appropriate message
                 return RedirectToAction("Error", "Home");
-            }
 
             var bookings = await _seatBookingService.GetUserBookingsAsync(userId);
             return View(bookings);
@@ -34,10 +33,26 @@ namespace CybageSeatBooking.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var availableSeats = await _seatBookingService.GetAvailableSeatsAsync();
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+                return RedirectToAction("Error", "Home");
 
+            var (nextWeekStart, nextWeekEnd) = GetNextWeekDateRange();
+
+            
+            var alreadyBooked = await _seatBookingService.HasBookingForWeekAsync(userId, nextWeekStart, nextWeekEnd);
+            if (alreadyBooked)
+            {
+                TempData["Error"] = "You have already booked a seat for next week.";
+                return RedirectToAction("Index");
+            }
+
+            var availableSeats = await _seatBookingService.GetAvailableSeatsAsync();
             ViewBag.SeatList = availableSeats;
             ViewBag.AvailableSeatIds = availableSeats.Select(s => s.Id).ToList();
+
+            ViewBag.NextWeekStart = nextWeekStart.ToString("MMMM dd");
+            ViewBag.NextWeekEnd = nextWeekEnd.ToString("MMMM dd");
 
             return View();
         }
@@ -50,39 +65,63 @@ namespace CybageSeatBooking.Controllers
             ModelState.Remove("User");
             ModelState.Remove("Seat");
 
-            if (!ModelState.IsValid)
-            {
-                var availableSeats = await _seatBookingService.GetAvailableSeatsAsync();
-                ViewBag.AvailableSeatIds = availableSeats.Select(s => s.Id).ToList();
-                ViewBag.SeatList = availableSeats;
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+                return RedirectToAction("Error", "Home");
 
+            var (nextWeekStart, nextWeekEnd) = GetNextWeekDateRange();
+
+            var alreadyBooked = await _seatBookingService.HasBookingForWeekAsync(userId, nextWeekStart, nextWeekEnd);
+            if (alreadyBooked)
+            {
+                TempData["Error"] = "You have already booked a seat for next week.";
+                return RedirectToAction("Index");
+            }
+
+            var isSeatBooked = await _seatBookingService.IsSeatBookedForWeekAsync(booking.SeatId, nextWeekStart, nextWeekEnd);
+            if (isSeatBooked)
+            {
+                ModelState.AddModelError("", "This seat is already booked for next week. Please choose another.");
+                await PopulateSeatViewDataAsync();
                 return View(booking);
             }
 
-            var userId = _userManager.GetUserId(User);
-            if (userId == null)
-            {
-                return RedirectToAction("Error", "Home");
-            }
-
             booking.EmployeeId = userId;
-            booking.StartDate = DateTime.Now;
-            booking.EndDate = DateTime.Now.AddDays(7);
+            booking.StartDate = nextWeekStart;
+            booking.EndDate = nextWeekEnd;
 
             await _seatBookingService.CreateBookingAsync(booking);
-            return RedirectToAction("Index", "SeatBooking");
+            TempData["Success"] = "Seat booked successfully!";
+            return RedirectToAction("Index");
         }
-
 
         public async Task<IActionResult> Cancel(int id)
         {
             var result = await _seatBookingService.CancelBookingAsync(id);
             if (!result)
-            {
                 return NotFound();
-            }
 
-            return RedirectToAction("Index", "SeatBooking");
+            TempData["Success"] = "Booking cancelled successfully!";
+            return RedirectToAction("Index");
+        }
+
+        private (DateTime start, DateTime end) GetNextWeekDateRange()
+        {
+            var today = DateTime.Today;
+            var nextSunday = today.AddDays(7 - (int)today.DayOfWeek);
+            var followingSunday = nextSunday.AddDays(7);
+            return (nextSunday, followingSunday);
+        }
+
+        private async Task PopulateSeatViewDataAsync()
+        {
+            var seats = await _seatBookingService.GetAvailableSeatsAsync();
+            ViewBag.SeatList = seats;
+            ViewBag.AvailableSeatIds = seats.Select(s => s.Id).ToList();
+
+            var (start, end) = GetNextWeekDateRange();
+            ViewBag.NextWeekStart = start.ToString("MMMM dd");
+            ViewBag.NextWeekEnd = end.ToString("MMMM dd");
         }
     }
 }

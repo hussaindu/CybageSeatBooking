@@ -45,8 +45,28 @@ public class SeatBookingRepository : ISeatBookingRepository
         await _context.SaveChangesAsync();
     }
 
-    public  async Task SaveChangesAsync()
+    public async Task<bool> IsSeatAlreadyBookedAsync(int seatId, DateTime startDate, DateTime endDate)
     {
-        await _context.SaveChangesAsync();
+        return await _context.seatBookings
+            .AnyAsync(b =>
+                b.SeatId == seatId &&
+                b.StartDate < endDate &&
+                b.EndDate > startDate);
     }
+
+    public async Task<bool> HasBookingForWeekAsync(string employeeId, DateTime startDate, DateTime endDate)
+    {
+        return await _context.seatBookings
+            .AnyAsync(b =>
+                b.EmployeeId == employeeId &&
+                b.StartDate == startDate &&
+                b.EndDate == endDate);
+    }
+
+    public Task SaveChangesAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+   
 }
