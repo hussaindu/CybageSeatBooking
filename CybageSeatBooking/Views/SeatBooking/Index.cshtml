@@ -7,13 +7,28 @@
     var currentUserId = UserManager.GetUserId(User);
 }
 
-<h2>Booked Seats</h2>
+<h2 class="mb-4">Booked Seats</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Warning:</strong> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success:</strong> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <table class="table table-bordered table-striped mt-3">
     <thead class="table-dark">
         <tr>
             <th>Seat Number</th>
-            <th>Id</th>
+            <th>Booking ID</th>
             <th>Booked By</th>
             <th>Start Date</th>
             <th>End Date</th>
@@ -41,27 +56,29 @@
                 <td>
                     @if (booking.User != null)
                     {
-                        @User.Identity.Name
+                        @booking.User.UserName
                     }
                     else
                     {
                         <span class="text-danger">No User</span>
                     }
                 </td>
-
                 <td>@booking.StartDate.ToString("dd-MMM-yyyy")</td>
                 <td>@booking.EndDate.ToString("dd-MMM-yyyy")</td>
                 <td>
-                    <a asp-action="Cancel" asp-route-id="@booking.Id" class="btn btn-danger btn-sm"
-                       onclick="return confirm('Are you sure you want to cancel this booking?');">
-                        Cancel
-                    </a>
+                    @if (isCurrentUser)
+                    {
+                        <a asp-action="Cancel" asp-route-id="@booking.Id" class="btn btn-danger btn-sm"
+                           onclick="return confirm('Are you sure you want to cancel this booking?');">
+                            Cancel
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Not allowed</span>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-
-
-@*    <td>@User.Identity.Name</td> *@
